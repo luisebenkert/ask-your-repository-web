@@ -37,6 +37,8 @@ class ImageDetail extends Component<Props, State> {
 
     if (!image) return <ActivityInidicator centered />;
 
+    console.log(image);
+
     return (
       <div className="ImageDetails">
         <ImageDetailsToolbar image={image} />
@@ -44,11 +46,21 @@ class ImageDetail extends Component<Props, State> {
           <img
             className="ImageDetails__image"
             src={image.url}
-            alt={image.userTags.join(' ')}
+            alt={image.tags.join(' ')}
           />
           <div className="ImageDetails__info">
             <div className="ImageDetail__tag-list">
               {image.userTags.map(tag => (
+                <Tag
+                  key={shortid.generate()}
+                  className="ImageDetail__tag"
+                  caption={tag}
+                />
+              ))}
+            </div>
+            <hr />
+            <div className="ImageDetail__tag-list">
+              {image.labelTags.map(tag => (
                 <Tag
                   key={shortid.generate()}
                   className="ImageDetail__tag"

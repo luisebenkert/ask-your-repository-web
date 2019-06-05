@@ -1,0 +1,95 @@
+.Evaluation {
+    width: 100%;
+    height: 100%;
+    margin-top: 50px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start; 
+
+    &__thankYou {
+        width: 100%;
+        margin-top: 15%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2.5em;
+        font-weight: 200;
+    }
+
+    &__toolbar {
+        width: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        margin-right: 150px;
+
+        &__title {
+            font-size: 1.5em;
+            font-weight: 200;
+            margin-bottom: .3em;
+        }
+
+        &__searchTerms {
+            font-size: 2em;
+            font-weight: 200;
+            margin-bottom: 1em;
+
+            p {
+                margin: 0;
+            }
+        }
+
+        &__submit {
+            background-color: rgb(27, 133, 133);
+            font-size: 1.2em;
+
+            &:hover {
+                background-color: rgb(51, 202, 202);
+            }
+
+            &:active {
+                background-color: rgb(26, 97, 97);
+            }
+        }
+    }
+}
+
+.ImageSlide {    
+    width: 25%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;    
+
+    &__item {
+        border-radius: 0px;
+        margin-bottom: 20px;
+        display: flex;
+        position: relative;
+
+        &__image {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+
+            &__disabled {
+                opacity: 0.4;
+            }
+        }
+
+        &__button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 25px;
+            height: 25px;
+            background-color: #333333;
+            border-bottom-left-radius: 5px;            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}

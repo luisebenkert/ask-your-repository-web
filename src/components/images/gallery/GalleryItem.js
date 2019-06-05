@@ -27,6 +27,11 @@ function GalleryItem(props: Props) {
           src={image.url}
           alt={displayedTags.join(', ')}
         />
+        {image.score && (
+          <div className="Gallery__item__score">
+            {Number(image.score).toFixed(2)}
+          </div>
+        )}
       </div>
       <GalleryItemOverlay image={image} maxTags={maxTags} />
     </Link>
