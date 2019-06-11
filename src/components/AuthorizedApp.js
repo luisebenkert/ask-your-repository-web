@@ -9,6 +9,8 @@ import TeamJoin from './team/TeamJoin';
 import NavBar from './navbar/NavBar';
 import Settings from './settings/Settings';
 import Evaluation from './evaluation/Evaluation';
+import EvaluationSearchTerms from './evaluation/EvaluationSearchTerms';
+import EvaluationRanking from './evaluation/EvaluationRanking';
 import Presentation from './presentation/Presentation';
 import TeamSidebar from './team_sidebar/TeamSidebar';
 import type { AppState } from '../state/AppState';
@@ -31,12 +33,14 @@ function AuthorizedApp(props: Props) {
       <TeamSidebar />
       <NavBar />
       <div className={classNames('App__inner', { 'App__inner--with-sidebar': props.isTeamSidebarOpen })}>
-        <Switch>        
+        <Switch>
           <Redirect exact from="/" to="/images" />
           <Route path="/select-team" component={TeamSelect} />
           <Route path="/settings" component={Settings} />
           <Route path="/teams/:id/settings" component={TeamSettings} />
           <Route path="/invites/:joinKey" component={TeamJoin} />
+          <TeamRoute path="/evaluation/search_terms" component={EvaluationSearchTerms} />
+          <TeamRoute path="/evaluation/ranking" component={EvaluationRanking} />
           <TeamRoute path="/evaluation" component={Evaluation} />
           <TeamRoute path="/upload" component={Upload} />
           <TeamRoute path="/images/:id/edit" component={ImageEdit} />

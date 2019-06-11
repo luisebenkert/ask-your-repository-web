@@ -41,6 +41,7 @@
 
     &__buttonbar {
       display: flex;
+      justify-content: space-evenly;
       padding-top: 1em;
 
       button:not(:last-child) {
