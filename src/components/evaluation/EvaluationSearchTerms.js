@@ -15,8 +15,6 @@ class EvaluationSearchTerms extends Component {
   constructor(props) {
     super(props);
 
-    console.log(props);
-
     this.state = {
       result: [],
       originals: [],
@@ -35,10 +33,12 @@ class EvaluationSearchTerms extends Component {
 
   finishEvaluation = () => {
     const {
+      testSet,
       result,
     } = this.state;
 
     EvaluationService.post({
+      name: testSet.name,
       type: 'search_terms',
       set: result,
     });
@@ -60,12 +60,6 @@ class EvaluationSearchTerms extends Component {
     }
   };
 
-  nextImage = () => {
-    this.setState(prevState => ({
-      currentIndex: prevState.currentIndex + 1,
-    }));
-  }
-
   handleChange = (event) => {
     this.setState({
       currentInput: event.target.value,
@@ -73,7 +67,7 @@ class EvaluationSearchTerms extends Component {
   };
 
   handleEnter = (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' || event.key === ' ') {
       this.setState(prevState => ({
         searchterms: [prevState.currentInput, ...prevState.searchterms],
         currentInput: '',
@@ -83,7 +77,15 @@ class EvaluationSearchTerms extends Component {
   };
 
   submitSearchTerms = () => {
-    const { originals, currentIndex, searchterms } = this.state;
+    const {
+      originals,
+      currentIndex,
+      searchterms,
+      currentInput,
+    } = this.state;
+
+    searchterms.push(currentInput);
+
     this.setState(prevState => ({
       result: [...prevState.result, {
         image: originals[currentIndex].id,

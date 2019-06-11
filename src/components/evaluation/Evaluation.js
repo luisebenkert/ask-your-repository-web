@@ -8,12 +8,29 @@ function Evaluation() {
 
   const testSets = {
     testSet1: {
+      name: 'testSet1',
       team_id: '8d1fbcfe-aae9-4f05-971e-da144b72f699',
-      test_words: [],
+      test_words: [
+        ['food'],
+        ['architecture'],
+        ['landscape', 'mountain'],
+        ['girl'],
+        ['person', 'girl'],
+        ['plants'],
+        ['flower'],
+        ['art'],
+        ['art', 'photography'],
+        ['person'],
+        ['nature', 'water'],
+      ],
     },
     testSet2: {
+      name: 'testSet2',
       team_id: 'ba2340a3-e798-4956-baf2-4ba6c76a074f',
-      test_words: [],
+      test_words: [
+        ['one', 'key'],
+        ['another', 'hey'],
+      ],
     },
   };
 
