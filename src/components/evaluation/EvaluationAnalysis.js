@@ -1,8 +1,8 @@
 // @flow
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { setActiveTeam } from '../../state/active_team/activeTeam.actionCreators';
 import EvaluationService from '../../services/EvaluationService';
+import loading from '../../assets/loading.gif';
 import './Evaluation.scss';
 
 class EvaluationAnalysis extends Component {
@@ -14,9 +14,10 @@ class EvaluationAnalysis extends Component {
       allFiles: [],
       filesRead: 0,
       combinedFiles: {},
-      calculated: false,
+      finishedInput: false,
       testSet: props.location.state.testSet,
       searches: {},
+      finishedSearch: false,
     };
   }
 
@@ -25,10 +26,59 @@ class EvaluationAnalysis extends Component {
   }
 
   componentDidUpdate() {
-    if (Object.keys(this.state.combinedFiles).length !== 0 && !this.state.calculated) {
+    const { finishedInput, finishedSearch, combinedFiles } = this.state;
+    if (Object.keys(combinedFiles).length !== 0 && !finishedInput) {
       this.getGoldenSet();
     }
+
+    if (finishedSearch && finishedInput) {
+      const result = this.calculateNDCG();
+      console.log(result);
+    }
   }
+
+  getRanking = () => {
+    const { searches } = this.state;
+    const ranking = Object.assign({}, searches);
+
+    Object.keys(searches).forEach((item) => {
+      const sorted = Object.keys(searches[item]).sort((a, b) => -(searches[item][a] - searches[item][b]));
+      ranking[item] = sorted;
+    });
+
+    return ranking;
+  };
+
+  calculateDCG = (ranking, combinedFiles = []) => {
+    let index = 1;
+    let sum = 0;
+
+    ranking.forEach((id) => {
+      const prio = combinedFiles[id] || 3;
+      const div = Math.log(index + 1);
+      const val = prio / div;
+      sum += val;
+      index += 1;
+    });
+
+    return sum;
+  }
+
+  calculateNDCG = () => {
+    const result = {};
+    const ranking = this.getRanking();
+    const { combinedFiles } = this.state;
+    const idcg = this.calculateDCG(ranking[Object.keys(ranking)[0]]);
+
+    Object.keys(ranking).forEach((item) => {
+      const dcg = this.calculateDCG(ranking[item], combinedFiles[item]);
+      const ndcg = dcg / idcg;
+
+      result[item] = ndcg;
+    });
+
+    return result;
+  };
 
   makeSearch = async (searchterms) => {
     const team = this.state.testSet.team_id;
@@ -39,6 +89,10 @@ class EvaluationAnalysis extends Component {
       await this.search(searchterms[index], team);
       index += 1;
     }
+
+    this.setState({
+      finishedSearch: true,
+    });
   };
 
   search = async (item, team) => {
@@ -150,19 +204,23 @@ class EvaluationAnalysis extends Component {
 
     this.setState({
       combinedFiles: result,
-      calculated: true,
+      finishedInput: true,
     });
   }
 
   render() {
-    const { combinedFiles, searches } = this.state;
-
-    console.log(combinedFiles);
-    console.log(searches);
+    const {
+      combinedFiles,
+      searches,
+      finishedInput,
+      finishedSearch,
+    } = this.state;
 
     return (
       <div className="EvaluationAnalysis">
-        
+        {(!finishedInput || !finishedSearch) && (
+          <img src={loading} className="EvaluationAnalysis__loading" alt="loading..." />
+        )}
       </div>
     );
   }

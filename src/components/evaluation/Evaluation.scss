@@ -13,6 +13,18 @@
     }
 }  
 
+.EvaluationAnalysis {
+    display: flex;
+    width: 100%;
+    min-height: 100%;
+    justify-content: center;
+    align-items: center;
+    
+    &__loading {
+        width: 10%;
+    }
+}
+
 .EvaluationFileDropzone {
     width: 100%;
     height: 100%;
