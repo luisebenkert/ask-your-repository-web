@@ -13,14 +13,81 @@
     }
 }  
 
+.EvaluationFileDropzone {
+    width: 100%;
+    height: 100%;
+
+    &__files {
+        display: flex;
+        flex-direction: column;
+
+        &__addition {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &__submit {
+                width: 60px;
+                height: 60px;
+                padding: 15px;
+                border-radius: 30px;
+                text-align: center;
+                vertical-align: middle;
+                color: white;
+                background-color: rgb(27, 133, 133);
+                font-size: 1.5em;
+                margin-left: 30px;
+    
+                &:hover {
+                    background-color: rgb(51, 202, 202);
+                }
+    
+                &:active {
+                    background-color: rgb(26, 97, 97);
+                }
+            }
+        }
+
+        &__item {
+            background-color: rgba(0,0,0,.2);
+            color: white;
+            padding: 20px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+    }
+}
+
 .Evaluation {
     width: 100%;
     height: 100%;
-    margin-top: 50px;
+    margin: 50px 0 80px 0;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+
+    &__content {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        padding: 0 80px 0 50px;
+
+        &__padding {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: 200;
+            text-align: center;
+            width: 15%;
+        }
+    }
+
+    &__dropzone {
+        flex: 1;
+        width: 100%;
+    }
 
     &__select {
         width: 260px;
@@ -38,20 +105,21 @@
     &__title {    
         font-size: 2.6em;
         font-weight: 200;
-        padding-bottom: 35px;
+        padding: 0 50px 35px 50px;
     }
 
     &__buttonbar {
         display: flex;
-        justify-content: space-evenly;
-        align-items: center;
+        flex-direction: column;
 
         &__button {
+            width: 100%;
             padding: 15px;
             border-radius: 10px;
             color: white;
             background-color: rgb(27, 133, 133);
             font-size: 1.2em;
+            margin-bottom: 1em;
 
             &:hover {
                 background-color: rgb(51, 202, 202);
@@ -163,6 +231,93 @@
         &__item {
             max-width: 70%;
             max-height: 500px;
+        }
+    }
+}
+
+.EvaluationRelevance {
+    width: 100%;
+    height: 100%;
+    margin-top: 50px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;     
+    
+    &__toolbar {
+        min-width: 30%;
+        width: 30%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+
+        &__title {
+            font-size: 1.5em;
+            font-weight: 200;
+            margin-bottom: 20px;
+        }
+
+        &__searchTerms {
+            font-size: 2em;
+            font-weight: 200;
+            margin-bottom: .7em;
+
+            p {
+                margin: 0;
+            }
+        }
+
+        &__rating {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+
+            &__button {
+                justify-content: center;
+                align-items: center;
+                margin-top: 30px;
+                padding: 20px 10px;
+                border-radius: 10px;
+                color: white;
+                font-size: 1.3em;
+                font-weight: 200;
+
+                &__green {
+                    background-color: var(--green);
+
+                    &:hover {
+                        background-color: var(--green-darker);
+                    }
+    
+                    &:active {
+                        background-color: var(--green);
+                    }
+                }
+
+                &__yellow {
+                    background-color: var(--yellow);
+
+                    &:hover {
+                        background-color: var(--yellow-darker);
+                    }
+    
+                    &:active {
+                        background-color: var(--yellow);
+                    }
+                }
+
+                &__red {
+                    background-color: var(--red);
+
+                    &:hover {
+                        background-color: var(--red-darker);
+                    }
+    
+                    &:active {
+                        background-color: var(--red);
+                    }
+                }
+            }
         }
     }
 }

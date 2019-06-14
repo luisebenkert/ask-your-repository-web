@@ -59,6 +59,17 @@
       background-color: hsla(0, 0, 0, .6);
 
       transition: opacity .1s;
+
+      &__labelbox {
+        display: flex;
+        flex-direction: column;
+
+        &__labels {
+          width: 100%;
+          border-bottom: 1px solid white;
+          margin-bottom: .5em;
+        }
+      }
     }
 
     &__ellipses {

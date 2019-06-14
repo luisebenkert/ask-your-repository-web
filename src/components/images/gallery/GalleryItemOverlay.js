@@ -19,7 +19,9 @@ type Props = {
 function GalleryItemOverlay(props: Props) {
   const { image, maxTags } = props;
   const tags = image.userTags || [];
-  const displayedTags = tags.slice(0, maxTags);
+  const labels = image.labelTags || [];
+  const displayedTags = labels !== [] ? tags.slice(0, maxTags / 2) : tags;
+  const displayedLabels = tags !== [] ? labels.slice(0, maxTags / 2) : labels;
   const showEllipses = tags.length >= maxTags;
 
   function handleClickDelete() {
@@ -35,16 +37,35 @@ function GalleryItemOverlay(props: Props) {
 
   return (
     <div className="Gallery__item__overlay">
-      <div>
-        {displayedTags.map(tag => (
-          <Tag
-            key={shortid.generate()}
-            caption={tag}
-          />
-        ))}
-        {showEllipses && (
-          <div className="Gallery__item__ellipses">
-            <IoIosMore />
+      <div className="Gallery__item__overlay__labelbox">
+        {displayedTags !== [] && (
+          <div className="Gallery__item__overlay__labelbox__labels">
+            {displayedTags.map(tag => (
+              <Tag
+                key={shortid.generate()}
+                caption={tag}
+              />
+            ))}
+            {showEllipses && (
+              <div className="Gallery__item__ellipses">
+                <IoIosMore />
+              </div>
+            )}
+          </div>
+        )}
+        {displayedLabels !== [] && (
+          <div>
+            {displayedLabels.map(tag => (
+              <Tag
+                key={shortid.generate()}
+                caption={tag}
+              />
+            ))}
+            {showEllipses && (
+              <div className="Gallery__item__ellipses">
+                <IoIosMore />
+              </div>
+            )}
           </div>
         )}
       </div>
