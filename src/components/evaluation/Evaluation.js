@@ -42,7 +42,7 @@ function Evaluation() {
       <div className="Evaluation__title">
         Evaluation
       </div>
-      <div className="Evaluation__content">        
+      <div className="Evaluation__content">
         <div className="Evaluation__buttonbar">
           <select
             className="Evaluation__select"
@@ -90,7 +90,7 @@ function Evaluation() {
         <div className="Evaluation__content__padding">
           or
         </div>
-        <div className="Evaluation__dropzone">
+        <div className="Evaluation__dropzone">          
           <EvaluationFileDropzone
             testSet={testSets[testSet]}
           />

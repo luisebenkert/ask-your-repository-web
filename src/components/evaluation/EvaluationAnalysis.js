@@ -1,6 +1,6 @@
-// @flow
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import Plot from 'react-plotly.js';
 import EvaluationService from '../../services/EvaluationService';
 import loading from '../../assets/loading.gif';
 import './Evaluation.scss';
@@ -10,220 +10,116 @@ class EvaluationAnalysis extends Component {
     super(props);
 
     this.state = {
+      pipelines: 7,
       files: props.location.state.files,
-      allFiles: [],
-      filesRead: 0,
-      combinedFiles: {},
-      finishedInput: false,
-      testSet: props.location.state.testSet,
-      searches: {},
-      finishedSearch: false,
+      testSetName: props.location.state.testSet.name,
+      teamId: props.location.state.testSet.team_id,
+      searchterms: props.location.state.testSet.test_words,
+      searchtermsLength: props.location.state.testSet.test_words.length,
+      searchDict: {},
     };
   }
 
-  componentDidMount() {
-    this.readFiles();
+  async componentDidMount() {
+    // this.combineFiles();
+    this.searchDatabase();
   }
 
   componentDidUpdate() {
-    const { finishedInput, finishedSearch, combinedFiles } = this.state;
-    if (Object.keys(combinedFiles).length !== 0 && !finishedInput) {
-      this.getGoldenSet();
-    }
-
-    if (finishedSearch && finishedInput) {
-      const result = this.calculateNDCG();
-      console.log(result);
-    }
+    console.log(this.state.searchDict);
+    console.log(this.state.searchDictInsertions);
   }
 
-  getRanking = () => {
-    const { searches } = this.state;
-    const ranking = Object.assign({}, searches);
+  searchDatabase = async () => {
+    const { pipelines, searchterms } = this.state;
+    const pipelinesMax = pipelines - 1;
+    const searchtermsMax = searchterms.length;
+    const searchDictLocal = {};
+    let numUpdates = 0;
+    const maxNumUpdates = pipelines * searchterms.length;
 
-    Object.keys(searches).forEach((item) => {
-      const sorted = Object.keys(searches[item]).sort((a, b) => -(searches[item][a] - searches[item][b]));
-      ranking[item] = sorted;
-    });
+    let pipelineCounter = -1;
+    let searchtermsCounter = 11;
 
-    return ranking;
-  };
-
-  calculateDCG = (ranking, combinedFiles = []) => {
-    let index = 1;
-    let sum = 0;
-
-    ranking.forEach((id) => {
-      const prio = combinedFiles[id] || 3;
-      const div = Math.log(index + 1);
-      const val = prio / div;
-      sum += val;
-      index += 1;
-    });
-
-    return sum;
+    this.loop(searchDictLocal, searchterms, pipelinesMax, pipelineCounter, searchtermsMax, searchtermsCounter, numUpdates, maxNumUpdates);
   }
 
-  calculateNDCG = () => {
-    const result = {};
-    const ranking = this.getRanking();
-    const { combinedFiles } = this.state;
-    const idcg = this.calculateDCG(ranking[Object.keys(ranking)[0]]);
-
-    Object.keys(ranking).forEach((item) => {
-      const dcg = this.calculateDCG(ranking[item], combinedFiles[item]);
-      const ndcg = dcg / idcg;
-
-      result[item] = ndcg;
-    });
-
-    return result;
-  };
-
-  makeSearch = async (searchterms) => {
-    const team = this.state.testSet.team_id;
-    const len = searchterms.length;
-    let index = 0;
-
-    while (index < len) {
-      await this.search(searchterms[index], team);
-      index += 1;
+  loop = (searchDictLocal, searchterms, pipelinesMax, pipelineCounter, searchtermsMax, searchtermsCounter, numUpdates, maxNumUpdates) => {
+    console.log('--------------------------');
+    if (searchtermsCounter >= searchtermsMax) {
+      searchtermsCounter = 0;
+      pipelineCounter += 1;
+      searchDictLocal[pipelineCounter] = {};
+      console.log(searchDictLocal);
+      console.log('///// NEW PIPELINE');
     }
 
-    this.setState({
-      finishedSearch: true,
-    });
-  };
+    console.log(`numUpdates: ${numUpdates}`);
+    console.log(`pipelineCounter: ${pipelineCounter}`);
+    console.log(`searchtermsCounter: ${searchtermsCounter}`);
 
-  search = async (item, team) => {
-    const search = item.split(',');
-    const result = await EvaluationService.get({
+    const element = searchterms[searchtermsCounter];
+    console.log(element);
+    const nameString = element.join(',');
+    console.log(nameString);
+    this.searchByKeywords(element, pipelineCounter)
+      .then((images) => {
+        console.log('images:');
+        console.log(images);
+        searchDictLocal[pipelineCounter][nameString] = images;
+        console.log('>>>>> updated dict');
+        console.log(searchDictLocal);
+        numUpdates += 1;
+        searchtermsCounter += 1;
+        if (numUpdates >= maxNumUpdates) {
+          this.callback(searchDictLocal);
+        } else {
+          this.loop(searchDictLocal, searchterms, pipelinesMax, pipelineCounter, searchtermsMax, searchtermsCounter, numUpdates, maxNumUpdates);
+        }
+      });
+  }
+
+  callback = (searchDictLocal) => {
+    console.log('-----------------------');
+    console.log('All done');
+    console.log(searchDictLocal);
+  }
+
+  searchByKeywords = async (keywords, pipeline) => {
+    const { teamId } = this.state;
+    const search = keywords.join(' ');
+    const searchResult = await EvaluationService.get({
       search,
-      teamId: team,
+      teamId,
       limit: 1000,
       offset: 0,
+      pipeline,
     });
 
-    const collection = {};
-    result.images.forEach((image) => {
-      collection[image.id] = image.score;
-    });
+    const filteredImages = searchResult.images.filter(image => image.score === undefined || image.score > 0);
+    const imageList = this.processSearchResult(filteredImages);
 
-    this.setState(prevState => ({
-      searches: {
-        ...prevState.searches,
-        [item]: collection,
-      },
-    }));
-  }
-
-  readFiles = () => {
-    for (let i = 0; i < this.state.files.length; i += 1) {
-      this.setupReader(this.state.files[i]);
-    }
+    return imageList;
   };
 
-  setupReader = (file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const object = JSON.parse(e.target.result);
-      this.setState(prevState => ({
-        allFiles: [...prevState.allFiles, object],
-      }));
-    };
-    reader.onloadend = () => {
-      this.setState(prevState => ({
-        filesRead: prevState.filesRead + 1,
-      }), () => {
-        if (this.state.filesRead >= this.state.files.length) {
-          this.combineSets();
-        }
-      });
-    };
-    reader.readAsText(file);
-  };
+  processSearchResult = (images) => {
+    const processedImages = {};
 
-  combineSets = () => {
-    const { allFiles } = this.state;
-    const searchterms = [];
-    let count = 0;
-
-    allFiles.forEach((file) => {
-      Object.keys(file).forEach((item) => {
-        if (count <= Object.keys(file).length) {
-          searchterms.push(item);
-          count += 1;
-        }
-        if (count === Object.keys(file).length + 1) {
-          this.makeSearch(searchterms);
-          count += 1;
-        }
-        Object.keys(file[item]).forEach((image) => {
-          this.setState((prevState) => {
-            const counts = prevState.combinedFiles[item] && prevState.combinedFiles[item][image]
-              ? prevState.combinedFiles[item][image]
-              : [];
-            counts.push(file[item][image]);
-
-            return {
-              combinedFiles: {
-                ...prevState.combinedFiles,
-                [item]: {
-                  ...prevState.combinedFiles[item],
-                  [image]: counts,
-                },
-              },
-            };
-          });
-        });
-      });
-    });
-  }
-
-  calculateKappa = (count) => {
-    let sum = 0;
-    count.forEach((item) => {
-      sum += item;
-    });
-    const avg = sum / count.length;
-    return avg;
-  };
-
-  getGoldenSet = () => {
-    const { combinedFiles } = this.state;
-    const result = {};
-    Object.assign(result, combinedFiles);
-
-    Object.keys(result).forEach((searchterm) => {
-      Object.keys(result[searchterm]).forEach((item) => {
-        const count = result[searchterm][item];
-        const average = this.calculateKappa(count);
-        result[searchterm][item] = average;
-      });
+    images.forEach((imageElement) => {
+      const { id, score } = imageElement;
+      processedImages[id] = score;
     });
 
-    this.setState({
-      combinedFiles: result,
-      finishedInput: true,
-    });
+    return processedImages;
   }
 
   render() {
-    const {
-      combinedFiles,
-      searches,
-      finishedInput,
-      finishedSearch,
-    } = this.state;
-
     return (
-      <div className="EvaluationAnalysis">
-        {(!finishedInput || !finishedSearch) && (
-          <img src={loading} className="EvaluationAnalysis__loading" alt="loading..." />
-        )}
+      <div>
+        hi
       </div>
     );
   }
 }
 
-export default connect()(EvaluationAnalysis);
+export default EvaluationAnalysis;
